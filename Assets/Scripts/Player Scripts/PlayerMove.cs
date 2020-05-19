@@ -27,11 +27,51 @@ public class PlayerMove : MonoBehaviour
         charController = GetComponent<CharacterController>();
     }
 
+    
+
     // Update is called once per frame
     void Update()
     {
-        MoveThePlayer();
-        charController.Move(player_Move);
+        CalculateHeight();
+        CheckIfFinishedMovement();
+    }
+
+    bool IsGrounded()
+    {
+        return collisionFlags == CollisionFlags.CollidedBelow ? true : false;
+    }
+
+    void CalculateHeight()
+    {
+        if (IsGrounded())
+        {
+            height = 0f;
+        }
+        else
+        {
+            height -= gravity * Time.deltaTime;
+        }
+    }
+
+    void CheckIfFinishedMovement()
+    {
+        //if we DID NOT finished movement
+        if (!finished_Movement)
+        {
+            if(!anim.IsInTransition(0) && !anim.GetCurrentAnimatorStateInfo(0).IsName("Stand") && anim.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.8f)
+            {//normalized time of the animation is represented from 0 to 1
+                //0 is the beginning of the animation
+                //0.5 is the middle of the animation
+                //1 is the end of the animation
+                finished_Movement = true;
+            }
+        }
+        else
+        {
+            MoveThePlayer();
+            player_Move.y = height * Time.deltaTime;
+            collisionFlags = charController.Move(player_Move);
+        }
     }
 
     void MoveThePlayer()
